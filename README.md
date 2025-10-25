@@ -1,16 +1,16 @@
 # 🎬 Buscador de Películas
 
-Aplicación web para buscar y explorar películas utilizando la API de The Movie Database (TMDB). Permite a los usuarios encontrar información sobre películas, ver detalles y gestionar sus búsquedas.
+Aplicación web para buscar y explorar películas utilizando la API de The Movie Database (TMDB). Permite a los usuarios encontrar información actualizada sobre películas, ver detalles como sinopsis, año de estreno y calificaciones.
 
 ## 🚀 Tecnologías
 
-- **Frontend:** React, JavaScript, CSS
-- **Backend:** Node.js, Express
+- **Frontend:** React, Vite
+- **Lenguajes:** JavaScript, CSS
 - **API:** The Movie Database (TMDB)
 
 ## 📋 Funcionalidades
 
 - Búsqueda de películas por título
-- Visualización de resultados con información relevante
-- Integración con API externa para datos actualizados
+- Visualización de películas populares
+- Información detallada de cada película
 - Interfaz responsive
