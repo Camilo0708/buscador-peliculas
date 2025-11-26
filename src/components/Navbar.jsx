@@ -17,7 +17,7 @@ function Navbar({ toggleSidebar }) {
         </div>
 
         <div className="navbar-actions">
-          <button className="nav-button">Iniciar Sesión</button>
+          <span className="navbar-info">OMDb API</span>
         </div>
       </div>
     </nav>

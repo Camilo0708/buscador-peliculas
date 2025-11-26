@@ -5,65 +5,60 @@ import Sidebar from './components/Sidebar';
 import SearchBar from './components/SearchBar';
 import MovieCard from './components/MovieCard';
 import Footer from './components/Footer';
+import MovieModal from './components/MovieModal.jsx';
 
-const API_KEY = 'TU_API_KEY_AQUI'; // Reemplaza con tu API Key
-const BASE_URL = 'https://api.themoviedb.org/3';
+const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
+const BASE_URL = 'https://www.omdbapi.com/';
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('popular');
+  const [selectedType, setSelectedType] = useState('movie');
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
   useEffect(() => {
-    fetchMoviesByCategory(selectedCategory);
-  }, [selectedCategory]);
+    fetchInitialMovies();
+  }, []);
 
-  const fetchMoviesByCategory = async (category) => {
+  const fetchInitialMovies = async () => {
     setLoading(true);
     try {
-      let endpoint = '';
-      switch(category) {
-        case 'popular':
-          endpoint = '/movie/popular';
-          break;
-        case 'top_rated':
-          endpoint = '/movie/top_rated';
-          break;
-        case 'upcoming':
-          endpoint = '/movie/upcoming';
-          break;
-        case 'now_playing':
-          endpoint = '/movie/now_playing';
-          break;
-        default:
-          endpoint = '/movie/popular';
-      }
+      const queries = ['the', 'a', 'movie'];
+      const randomQuery = queries[Math.floor(Math.random() * queries.length)];
       
       const response = await fetch(
-        `${BASE_URL}${endpoint}?api_key=${API_KEY}&language=es-ES`
+        `${BASE_URL}?s=${randomQuery}&type=movie&apikey=${API_KEY}&page=1`
       );
       const data = await response.json();
-      setMovies(data.results || []);
+      if (data.Search) {
+        setMovies(data.Search);
+      }
     } catch (error) {
       console.error('Error:', error);
     }
     setLoading(false);
   };
 
+
+
   const searchMovies = async (query) => {
     if (!query.trim()) {
-      fetchMoviesByCategory(selectedCategory);
+      fetchInitialMovies();
       return;
     }
 
     setLoading(true);
     try {
       const response = await fetch(
-        `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`
+        `${BASE_URL}?s=${encodeURIComponent(query)}&type=${selectedType}&apikey=${API_KEY}`
       );
       const data = await response.json();
-      setMovies(data.results || []);
+      if (data.Search) {
+        setMovies(data.Search);
+      } else {
+        setMovies([]);
+      }
     } catch (error) {
       console.error('Error:', error);
     }
@@ -74,46 +69,57 @@ function App() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-    setSidebarOpen(false);
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
   };
 
+
   return (
-    <div className="App">
-      <Navbar toggleSidebar={toggleSidebar} />
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)}
-        onCategoryChange={handleCategoryChange}
-        selectedCategory={selectedCategory}
-      />
-      
-      <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="search-section">
-          <h1>Buscador de Películas</h1>
-          <SearchBar onSearch={searchMovies} />
-        </div>
+      <div className="App">
+        <Navbar toggleSidebar={toggleSidebar} />
+        <Sidebar 
+          isOpen={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)}
+          onSearch={searchMovies}
+        />
+        <main className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
+          <div className="search-section">
+            <h1>Buscador de Películas</h1>
+            <SearchBar onSearch={searchMovies} />
+          </div>
 
-        <div className="movies-grid">
-          {loading ? (
-            <div className="loading">
-              <div className="spinner"></div>
-              <p>Cargando películas...</p>
-            </div>
-          ) : movies.length > 0 ? (
-            movies.map(movie => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))
-          ) : (
-            <p className="no-results">No se encontraron resultados</p>
-          )}
-        </div>
-      </main>
+          <div className="movies-grid">
+            {loading ? (
+              <div className="loading">
+                <div className="spinner"></div>
+                <p>Cargando películas...</p>
+              </div>
+            ) : movies.length > 0 ? (
+              movies.map(movie => (
+                <MovieCard 
+                  key={movie.imdbID} 
+                  movie={movie}
+                  onClick={() => setSelectedMovie(movie)}
+                />
+              ))
+            ) : (
+              <p className="no-results">No se encontraron resultados</p>
+            )}
+          </div>
+        </main>
 
-      <Footer />
-    </div>
-  );
+        {selectedMovie && (
+          <MovieModal 
+            movie={selectedMovie} 
+            onClose={() => setSelectedMovie(null)}
+            apiKey={API_KEY}
+          />
+        )}
+
+        <Footer />
+      </div>
+    );
+
 }
 
 export default App;
